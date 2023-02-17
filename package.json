@@ -1,0 +1,26 @@
+{
+  "name": "ecommerce-project-",
+  "version": "1.0.0",
+  "description": "A full Stack Project For Ecommerce  -This is back end",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dhoreneeraj/Ecommerce-Project-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dhoreneeraj/Ecommerce-Project-/issues"
+  },
+  "homepage": "https://github.com/dhoreneeraj/Ecommerce-Project-#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^6.9.2"
+  }
+}
