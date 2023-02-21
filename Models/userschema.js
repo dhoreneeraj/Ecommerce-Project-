@@ -67,8 +67,25 @@ getJwtToken: function(){
     }
    )
 
-}
+},
 
+// generate forgot password 
+
+generateForgotPasswordToken: function(){
+ const forgotToken= crypto.randomBytes(64).toString('hex');
+
+ //step 1 save to db
+ this.forgotpasswordToken = crypto
+ .createHash("sha256")
+ .update(forgotToken)
+ .digest("hex")
+
+ this.forgotpasswordExpiry = Date.now() + 20 * 60 * 1000
+
+ //return the values to user
+  return forgotToken
+
+}
 }
 
 
