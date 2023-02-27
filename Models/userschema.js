@@ -85,7 +85,8 @@ generateForgotPasswordToken: function(){
  //return the values to user
   return forgotToken
 
-}
+},
+
 }
 
 
