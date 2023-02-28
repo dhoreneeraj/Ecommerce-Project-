@@ -1,6 +1,8 @@
 import User from '../Models/userschema'
 import asyncHandler from "../service/asynchandler"
 import CustomError from "../utils/custom.Error"
+import mailHelper from '../utils/.mailhelper'
+import crypto from 'crypto'
 
 export const cookieOptions = {
      expires: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
@@ -117,4 +119,104 @@ export const login = asyncHandler(async (req,res) =>{
 
  })
 
+ /*
+@Forgot password
+@route https://localhost:4000/api/auth/password/reset
+@description : user will submit email and we will generate token
+@parameters :email
+@return success message: email sent
+
+*/  
+
+export const forgotPassword = asyncHandler(async (req,res) => {
+  const {email} = req.body
+ const user = User.findOne({email})
  
+ if(!user) {
+  throw new CustomError ('USer not found',404)
+
+ }
+
+ const resetToken = user.generateForgotPasswordToken()
+
+ await user.save ({validateBeforeSave:false})
+
+ const resetUrl=
+ `${req.protocol}://${req.get ("host")}/api/auth/password/reset/ ${resetToken}`
+  
+ const text = `your password reset url is 
+ /n/n  ${resetUrl} /n/n`
+ try {
+  await mailHelper ({
+    email: user.email,
+    subject: "password reset email for website",
+    text: text
+  })
+    res.status(200).json({
+      success:true,
+      message: "email send to ${user.email}"
+    })
+  
+ } catch (error) {
+
+  //rollback - clear feild and save
+
+  user.forgotPasswordToken = undefined
+  user.forgotPasswordExpiry = undefined
+
+  await user.save({validateBeforeSave: false})
+
+  throw new CustomError ('email sent failure',500)
+
+ }
+})
+
+/*
+@Reset password
+@route https://localhost:4000/api/auth/password/reset:reseToken
+@description : user will be able to reset password based on url token
+@parameters : token from url,password and confirm pass
+@return success message: user object
+
+*/  
+
+export const resetPassword = asyncHandler(async (req,res){
+
+  const {token: resetToken} = req.params
+  const {password,confirmPassword} = req.body
+
+  const resetPasswordToken = crypto
+  .createHash('sha256')
+  .update(resetToken)
+  .digest('hex')
+
+  const user = await User.findOne({
+    forgotPasswordToken : resetPasswordToken,
+    forgotPasswordExpiry : {$gt: Date.now()}
+  })
+
+  if(!user){
+    throw new CustomError('password token in invalid or expired',400)
+  }
+ 
+   if(password !== confirmPassword){
+    throw new CustomError('password and confirm password does not match',400)
+
+}
+  user.password = password
+  user.forgotPasswordToken = undefined
+  user.forgotPasswordExpiry = undefined
+
+  await user.save()
+   
+   //create token and send it to user as response
+   const token = user.getjwtToken()
+   user.password = undefined
+
+   //helper method for cookie can be added 
+   res.cookie("token",token,cookieOptions)
+   res.status(200).json({
+    success:true,
+    user
+   })
+})
