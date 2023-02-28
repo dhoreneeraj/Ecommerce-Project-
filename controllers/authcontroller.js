@@ -74,7 +74,7 @@ export const login = asyncHandler(async (req,res) =>{
         throw new CustomError ('please fill all feild',400)
     }
 
-    const user = User.findOne({email}).select("+password")
+    const user = await User.findOne({email}).select("+password")
 
     if(!user) {
       throw new CustomError ('invalid credential',400)
@@ -220,3 +220,21 @@ export const resetPassword = asyncHandler(async (req,res){
     user
    })
 })
+
+/*
+@Get profile
+@route https://localhost:4000/api/auth/profile
+@description : check for token and populate req.user
+@return success message: user object
+
+*/
+export const getProlife = asyncHandler(async (req,res) => {
+  const {user} = req
+  if (!user){
+    throw new CustomError('User not found',404)
+}
+   res.status(200).json({
+   success:true,
+   user
+   })
+  })
