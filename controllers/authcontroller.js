@@ -180,7 +180,7 @@ export const forgotPassword = asyncHandler(async (req,res) => {
 
 */  
 
-export const resetPassword = asyncHandler(async (req,res){
+export const resetPassword = asyncHandler(async (req,res) => {
 
   const {token: resetToken} = req.params
   const {password,confirmPassword} = req.body
